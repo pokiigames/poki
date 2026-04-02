@@ -3,381 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>⚡ FAST BIRD | Aviator Rush - Coin Collector</title>
+    <title>⚡ SKY BIRD | Fullscreen Aviator</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
         }
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #0a2f3a 0%, #030e12 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Courier New', monospace;
+            background: #0a2f3a;
             overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
+            font-family: 'Segoe UI', 'Courier New', monospace;
         }
 
-        .orientation-warning {
-            display: none;
+        /* Fullscreen canvas */
+        canvas {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            color: white;
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-            font-size: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        @media (orientation: portrait) {
-            .orientation-warning {
-                display: flex;
-            }
-            .game-wrapper {
-                display: none;
-            }
-        }
-
-        .game-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             width: 100%;
             height: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .game-container {
-            background: #000000aa;
-            border-radius: 1.5rem;
-            padding: 0.8rem;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-            display: inline-block;
-        }
-
-        canvas {
             display: block;
-            margin: 0 auto;
-            border-radius: 1rem;
-            box-shadow: 0 0 0 3px #ffd966, 0 10px 25px rgba(0,0,0,0.3);
             cursor: none;
-            width: 100%;
-            height: auto;
         }
 
-        .info-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.8rem;
-            background: #071e24dd;
+        /* Minimal UI - only top left corner */
+        .stats {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(8px);
-            padding: 0.5rem 1rem;
-            border-radius: 3rem;
-            color: #f5f9ff;
-            text-shadow: 0 2px 2px black;
+            padding: 10px 18px;
+            border-radius: 28px;
+            border-left: 4px solid #ffd966;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            pointer-events: none;
             font-weight: bold;
-            gap: 0.8rem;
-            flex-wrap: wrap;
         }
 
-        .score-box, .best-box, .coin-box {
-            background: #010f14;
-            padding: 0.2rem 1rem;
-            border-radius: 2rem;
+        .stat-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            color: #f5f9ff;
+            text-shadow: 0 1px 2px black;
+            font-size: 1.3rem;
             letter-spacing: 1px;
-            text-align: center;
-            min-width: 85px;
         }
 
-        .score-box span, .best-box span, .coin-box span {
-            color: #ffd966;
+        .stat-item:first-child {
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
             font-size: 0.7rem;
-            display: block;
+            font-weight: normal;
+            color: #ffd966;
+            letter-spacing: 1px;
         }
 
-        .score-box div, .best-box div, .coin-box div {
+        .stat-value {
             font-size: 1.8rem;
             font-weight: 800;
             line-height: 1;
             font-family: monospace;
+            color: #fff2cf;
         }
 
-        .coin-box span {
-            color: #ffcc44;
-        }
-        .coin-box div {
-            color: #ffdd77;
-        }
-
-        .controls-info {
-            display: flex;
-            gap: 0.8rem;
-            background: #00000066;
-            padding: 0.3rem 0.8rem;
-            border-radius: 2rem;
-            font-size: 0.7rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        button {
+        /* Restart button - minimal but tappable */
+        .restart-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 20px;
+            z-index: 100;
             background: #ffaa33;
             border: none;
             font-weight: bold;
             font-family: inherit;
-            padding: 0.4rem 1.2rem;
-            border-radius: 2rem;
-            font-size: 0.9rem;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: 0.1s linear;
-            box-shadow: 0 3px 0 #7a3e00;
+            box-shadow: 0 5px 0 #7a3e00;
             color: #1f2f2c;
             touch-action: manipulation;
+            pointer-events: auto;
+            transition: 0.05s linear;
+            letter-spacing: 1px;
         }
 
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #7a3e00;
+        .restart-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #7a3e00;
         }
 
-        .status {
-            background: #000000aa;
-            padding: 0.3rem 1rem;
-            border-radius: 2rem;
+        /* Game over overlay - subtle */
+        .game-over-tip {
+            position: fixed;
+            bottom: 30%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 90;
+            pointer-events: none;
+            font-size: 1.6rem;
             font-weight: bold;
-            backdrop-filter: blur(2px);
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-
-        .speed-meter {
-            background: #1a3a42;
-            padding: 0.2rem 0.8rem;
-            border-radius: 2rem;
-            font-size: 0.7rem;
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .touch-hint {
-            position: absolute;
-            bottom: 20px;
+            color: #ffaa77;
+            text-shadow: 0 2px 8px black;
+            background: rgba(0,0,0,0.5);
+            display: inline-block;
+            width: fit-content;
+            margin: 0 auto;
+            padding: 8px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: #ffea80;
-            pointer-events: none;
-            font-weight: bold;
             white-space: nowrap;
-            backdrop-filter: blur(4px);
+            font-family: monospace;
         }
 
+        /* Mobile landscape optimizations */
         @media (max-width: 800px) and (orientation: landscape) {
-            .score-box div, .best-box div, .coin-box div { font-size: 1.4rem; }
-            .score-box, .best-box, .coin-box { min-width: 70px; padding: 0.1rem 0.6rem; }
-            .info-panel { padding: 0.4rem 0.8rem; gap: 0.5rem; }
-            button { padding: 0.3rem 0.9rem; font-size: 0.8rem; }
-            .status { font-size: 0.7rem; }
-            .touch-hint { font-size: 9px; bottom: 8px; }
+            .stat-value { font-size: 1.5rem; }
+            .stat-label { font-size: 0.6rem; }
+            .stats { padding: 6px 14px; top: 10px; left: 10px; }
+            .restart-btn { padding: 8px 18px; font-size: 0.9rem; bottom: 15px; right: 15px; }
+            .game-over-tip { font-size: 1.2rem; bottom: 35%; padding: 5px 14px; }
+        }
+
+        @media (max-width: 550px) {
+            .stat-value { font-size: 1.3rem; }
+            .stats { padding: 5px 12px; }
         }
     </style>
 </head>
 <body>
-<div class="orientation-warning">
-    <div style="font-size: 3rem;">🔄</div>
-    <div>LANDSCAPE MODE REQUIRED</div>
-    <div style="font-size: 0.9rem; margin-top: 1rem;">Rotate your device for maximum speed!</div>
-</div>
-
-<div class="game-wrapper">
-    <div class="game-container">
-        <canvas id="gameCanvas" width="1000" height="500"></canvas>
-        <div class="info-panel">
-            <div class="score-box">
-                <span>🏆 SCORE</span>
-                <div id="scoreValue">0</div>
-            </div>
-            <div class="coin-box">
-                <span>💰 COINS</span>
-                <div id="coinValue">0</div>
-            </div>
-            <div class="best-box">
-                <span>⭐ BEST</span>
-                <div id="bestValue">0</div>
-            </div>
-            <div class="controls-info">
-                <span>🖱️ TOUCH & FLY</span>
-                <button id="resetGameBtn">⚡ RESTART</button>
-            </div>
-            <div class="status" id="gameStatusText">🐦 FLYING FAST</div>
-            <div class="speed-meter" id="speedMeter">🚀 1.0x</div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="stats">
+        <div class="stat-item">
+            <span class="stat-label">🏆 SCORE</span>
+            <span class="stat-value" id="scoreValue">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">💰 COINS</span>
+            <span class="stat-value" id="coinValue">0</span>
         </div>
     </div>
-</div>
-<div class="touch-hint">👇 SLIDE UP/DOWN — SUPER RESPONSIVE BIRD MOVEMENT!</div>
+    <button class="restart-btn" id="resetGameBtn">✈️ RESTART</button>
+    <div id="gameOverMsg" class="game-over-tip" style="display: none;">💥 GAME OVER 💥</div>
 
 <script>
     (function(){
-        // ========== CANVAS SETUP ==========
+        // -------------------- FULLSCREEN CANVAS --------------------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        const WORLD_W = 1000;
-        const WORLD_H = 500;
+        let WORLD_W, WORLD_H;
         
-        function resizeCanvas() {
-            const maxWidth = window.innerWidth - 30;
-            const maxHeight = window.innerHeight - 120;
-            let newWidth = Math.min(maxWidth, WORLD_W);
-            let newHeight = newWidth / 2;
-            if (newHeight > maxHeight) {
-                newHeight = maxHeight;
-                newWidth = newHeight * 2;
-            }
-            canvas.style.width = `${newWidth}px`;
-            canvas.style.height = `${newHeight}px`;
+        function updateCanvasSize() {
+            WORLD_W = window.innerWidth;
+            WORLD_H = window.innerHeight;
             canvas.width = WORLD_W;
             canvas.height = WORLD_H;
         }
         
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', () => {
+            updateCanvasSize();
+            // reposition player after resize
+            if (playerY !== undefined) {
+                playerY = Math.min(Math.max(playerY, 20), WORLD_H - PLAYER_H - 20);
+                targetY = playerY;
+            }
+        });
+        updateCanvasSize();
         
-        // ========== GAME STATE ==========
+        // -------------------- GAME STATE --------------------
         let gameRunning = true;
         let score = 0;
         let totalCoins = 0;
         let bestScore = 0;
         
+        // Load best score from localStorage
         try {
-            const saved = localStorage.getItem('fast_bird_best');
+            const saved = localStorage.getItem('fullscreen_aviator_best');
             if(saved && !isNaN(parseInt(saved))) bestScore = parseInt(saved);
         } catch(e) {}
         
-        // ========== PLAYER - FAST BIRD with MOMENTUM ==========
-        const PLAYER_W = 46;
-        const PLAYER_H = 36;
+        // -------------------- PLAYER (BIRD) --------------------
+        const PLAYER_W = 48;
+        const PLAYER_H = 38;
         let playerX = 110;
         let playerY = WORLD_H/2 - PLAYER_H/2;
         let targetY = playerY;
         
-        // ENHANCED MOMENTUM: bird moves faster & smoother
+        // Momentum for smooth but responsive movement
         let momentum = 0;
-        const MOMENTUM_FACTOR = 0.38;    // quicker response
-        const MAX_SPEED_Y = 14;
+        const MOMENTUM_FACTOR = 0.32;
+        const MAX_SPEED_Y = 12;
         
-        // ========== DYNAMIC SPEED SYSTEM ==========
-        let BASE_SPEED = 3.8;   // increased base speed
+        // -------------------- DYNAMIC SPEED --------------------
+        let BASE_SPEED = 4.2;     // faster base for excitement
         let currentWorldSpeed = BASE_SPEED;
         let speedMultiplier = 1.0;
-        let gameTimer = 0;
+        let speedTimer = 0;
         
-        // ========== OBSTACLES ==========
+        // -------------------- OBSTACLES --------------------
         let obstacles = [];
         
-        // ========== COINS ==========
+        // -------------------- COINS --------------------
         let coins = [];
-        const COIN_SIZE = 20;
+        const COIN_SIZE = 22;
         let coinSpawnCounter = 0;
-        let coinSpawnDelay = 30;
+        let coinSpawnDelay = 32;
         
-        // ========== PARTICLES (dynamic effects) ==========
+        // -------------------- PARTICLES --------------------
         let particles = [];
         let trailParticles = [];
         
-        // Obstacle spawn
+        // Spawn control
         let framesSinceLastSpawn = 0;
         let spawnDelayFrames = 38;
         
-        // ========== UI Updates ==========
-        function updateBestUI(){
-            document.getElementById('bestValue').innerText = Math.floor(bestScore);
-        }
-        function updateScoreUI(){
-            document.getElementById('scoreValue').innerText = Math.floor(score);
+        // UI Elements
+        const scoreElement = document.getElementById('scoreValue');
+        const coinElement = document.getElementById('coinValue');
+        const gameOverMsgDiv = document.getElementById('gameOverMsg');
+        
+        function updateScoreUI() {
+            scoreElement.innerText = Math.floor(score);
             if(Math.floor(score) > bestScore){
                 bestScore = Math.floor(score);
-                updateBestUI();
-                try { localStorage.setItem('fast_bird_best', bestScore); } catch(e) {}
+                try { localStorage.setItem('fullscreen_aviator_best', bestScore); } catch(e) {}
             }
         }
-        function updateCoinUI(){
-            document.getElementById('coinValue').innerText = totalCoins;
-        }
-        function updateSpeedUI(){
-            document.getElementById('speedMeter').innerHTML = `🚀 ${speedMultiplier.toFixed(1)}x`;
+        
+        function updateCoinUI() {
+            coinElement.innerText = totalCoins;
         }
         
-        // ========== GRADUAL SPEED INCREASE (slowly speed up) ==========
+        // -------------------- GRADUAL SPEED INCREASE (slowly speed up) --------------------
         function updateGradualSpeed() {
             if(!gameRunning) return;
-            gameTimer++;
-            if(gameTimer >= 65) {  // faster increment for thrill
-                gameTimer = 0;
-                speedMultiplier = Math.min(3.2, speedMultiplier + 0.055);
+            speedTimer++;
+            if(speedTimer >= 70) {
+                speedTimer = 0;
+                speedMultiplier = Math.min(3.0, speedMultiplier + 0.048);
                 currentWorldSpeed = BASE_SPEED * speedMultiplier;
-                updateSpeedUI();
                 
-                let baseDelay = 42;
-                let dynamicDelay = Math.floor(baseDelay / (0.7 + (speedMultiplier * 0.55)));
-                spawnDelayFrames = Math.max(20, Math.min(48, dynamicDelay));
-                coinSpawnDelay = Math.max(22, Math.floor(34 / (0.8 + speedMultiplier * 0.45)));
+                // adjust spawn delays based on speed
+                let baseDelay = 44;
+                let dynamicDelay = Math.floor(baseDelay / (0.75 + (speedMultiplier * 0.5)));
+                spawnDelayFrames = Math.max(22, Math.min(50, dynamicDelay));
+                coinSpawnDelay = Math.max(24, Math.floor(36 / (0.85 + speedMultiplier * 0.4)));
             }
         }
         
-        // ========== SPAWN COIN ==========
-        function spawnCoin() {
-            let randY = Math.random() * (WORLD_H - COIN_SIZE - 35) + 18;
-            randY = Math.min(Math.max(randY, 15), WORLD_H - COIN_SIZE - 15);
-            coins.push({
-                x: WORLD_W,
-                y: randY,
-                width: COIN_SIZE,
-                height: COIN_SIZE,
-                spin: Math.random() * Math.PI * 2,
-                value: 1
-            });
-        }
-        
-        // ========== SPAWN OBSTACLE ==========
-        function spawnObstacle(){
+        // -------------------- SPAWN OBSTACLES & COINS --------------------
+        function spawnObstacle() {
             let variant = Math.random();
             let obsW, obsH;
             let type = "missile";
             if(variant < 0.3) {
-                obsW = 30 + Math.random() * 20;
-                obsH = 32 + Math.random() * 18;
+                obsW = 32 + Math.random() * 20;
+                obsH = 34 + Math.random() * 18;
                 type = "barrier";
             } else if(variant < 0.65) {
-                obsW = 18 + Math.random() * 14;
-                obsH = 42 + Math.random() * 20;
+                obsW = 20 + Math.random() * 14;
+                obsH = 44 + Math.random() * 18;
                 type = "missile";
             } else {
-                obsW = 28;
-                obsH = 28;
+                obsW = 30;
+                obsH = 30;
                 type = "mine";
             }
-            let randY = Math.random() * (WORLD_H - obsH - 28) + 14;
-            randY = Math.min(Math.max(randY, 8), WORLD_H - obsH - 8);
+            let randY = Math.random() * (WORLD_H - obsH - 35) + 18;
+            randY = Math.min(Math.max(randY, 15), WORLD_H - obsH - 15);
             obstacles.push({
                 x: WORLD_W,
                 y: randY,
@@ -388,23 +298,35 @@
             });
         }
         
-        // ========== COLLISION & MOVEMENT LOGIC ==========
+        function spawnCoin() {
+            let randY = Math.random() * (WORLD_H - COIN_SIZE - 45) + 22;
+            randY = Math.min(Math.max(randY, 20), WORLD_H - COIN_SIZE - 20);
+            coins.push({
+                x: WORLD_W,
+                y: randY,
+                width: COIN_SIZE,
+                height: COIN_SIZE,
+                spin: Math.random() * Math.PI * 2
+            });
+        }
+        
+        // -------------------- LOGIC UPDATES --------------------
         function updateObstaclesAndCoins() {
             if(!gameRunning) return;
             
-            // Move obstacles
+            // move obstacles
             for(let i=0; i<obstacles.length; i++){
                 obstacles[i].x -= currentWorldSpeed;
                 if(obstacles[i].type === 'mine') {
-                    obstacles[i].rotation = (obstacles[i].rotation || 0) + 0.12;
+                    obstacles[i].rotation = (obstacles[i].rotation || 0) + 0.1;
                 }
             }
             obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
             
-            // Move coins
+            // move coins
             for(let i=0; i<coins.length; i++){
                 coins[i].x -= currentWorldSpeed;
-                coins[i].spin += 0.18;
+                coins[i].spin += 0.16;
             }
             coins = coins.filter(coin => coin.x + COIN_SIZE > 0);
             
@@ -415,7 +337,7 @@
                 h: PLAYER_H
             };
             
-            // ========== COIN COLLECTION (with juicy particles) ==========
+            // Coin collection
             for(let i=0; i<coins.length; i++){
                 const coin = coins[i];
                 const coinRect = { x: coin.x, y: coin.y, w: COIN_SIZE, h: COIN_SIZE };
@@ -425,16 +347,16 @@
                    playerRect.y + playerRect.h > coinRect.y){
                     totalCoins++;
                     updateCoinUI();
-                    // coin burst effect
-                    for(let p=0; p<16; p++){
+                    // coin particles
+                    for(let p=0; p<14; p++){
                         particles.push({
                             x: coin.x + COIN_SIZE/2,
                             y: coin.y + COIN_SIZE/2,
-                            vx: (Math.random() - 0.5) * 5.5,
-                            vy: (Math.random() - 0.5) * 5 - 1.8,
-                            life: 0.9,
-                            size: 3 + Math.random() * 6,
-                            color: `hsl(${48 + Math.random() * 25}, 95%, 62%)`
+                            vx: (Math.random() - 0.5) * 5,
+                            vy: (Math.random() - 0.5) * 5 - 1.5,
+                            life: 0.85,
+                            size: 3 + Math.random() * 5,
+                            color: `hsl(${45 + Math.random() * 30}, 95%, 58%)`
                         });
                     }
                     coins.splice(i,1);
@@ -442,7 +364,7 @@
                 }
             }
             
-            // ========== OBSTACLE COLLISION ==========
+            // Obstacle collision
             for(let i=0; i<obstacles.length; i++){
                 const obs = obstacles[i];
                 const obsRect = { x: obs.x, y: obs.y, w: obs.width, h: obs.height };
@@ -456,21 +378,19 @@
             }
         }
         
-        // Score increment
         function updateScore() {
             if(!gameRunning) return;
-            let increment = 0.22 + (speedMultiplier * 0.12);
+            let increment = 0.2 + (speedMultiplier * 0.1);
             score += increment;
             updateScoreUI();
         }
         
-        // Spawn management
         function handleSpawning() {
             if(!gameRunning) return;
             if(framesSinceLastSpawn >= spawnDelayFrames){
                 spawnObstacle();
                 framesSinceLastSpawn = 0;
-                if(speedMultiplier > 1.5 && Math.random() < 0.3) spawnObstacle();
+                if(speedMultiplier > 1.6 && Math.random() < 0.28) spawnObstacle();
             } else {
                 framesSinceLastSpawn++;
             }
@@ -478,39 +398,40 @@
             if(coinSpawnCounter >= coinSpawnDelay){
                 spawnCoin();
                 coinSpawnCounter = 0;
-                if(speedMultiplier > 1.3 && Math.random() < 0.4) spawnCoin();
+                if(speedMultiplier > 1.3 && Math.random() < 0.35) spawnCoin();
             } else {
                 coinSpawnCounter++;
             }
         }
         
-        function setGameOver(){
+        function setGameOver() {
             if(!gameRunning) return;
             gameRunning = false;
-            document.getElementById('gameStatusText').innerHTML = '💥 CRASHED 💥';
-            document.getElementById('gameStatusText').style.color = "#ffaa88";
-            for(let p=0; p<45; p++){
+            gameOverMsgDiv.style.display = "block";
+            // explosion particles
+            for(let p=0; p<50; p++){
                 particles.push({
                     x: playerX + PLAYER_W/2,
                     y: playerY + PLAYER_H/2,
                     vx: (Math.random() - 0.5) * 9,
-                    vy: (Math.random() - 0.5) * 9 - 2.5,
+                    vy: (Math.random() - 0.5) * 9 - 2,
                     life: 0.98,
                     size: 3 + Math.random() * 8,
-                    color: `hsl(${15 + Math.random() * 45}, 85%, 60%)`
+                    color: `hsl(${15 + Math.random() * 40}, 85%, 58%)`
                 });
             }
         }
         
-        function resetGame(){
+        function resetGame() {
             gameRunning = true;
             score = 0;
             totalCoins = 0;
             updateScoreUI();
             updateCoinUI();
+            gameOverMsgDiv.style.display = "none";
             currentWorldSpeed = BASE_SPEED;
             speedMultiplier = 1.0;
-            gameTimer = 0;
+            speedTimer = 0;
             obstacles = [];
             coins = [];
             particles = [];
@@ -518,48 +439,44 @@
             playerY = WORLD_H/2 - PLAYER_H/2;
             targetY = playerY;
             momentum = 0;
-            framesSinceLastSpawn = 6;
-            coinSpawnCounter = 4;
+            framesSinceLastSpawn = 5;
+            coinSpawnCounter = 3;
             spawnDelayFrames = 38;
-            coinSpawnDelay = 30;
-            updateSpeedUI();
-            document.getElementById('gameStatusText').innerHTML = '🐦 FLYING FAST';
-            document.getElementById('gameStatusText').style.color = "#ffd966";
+            coinSpawnDelay = 32;
         }
         
-        // ========== ENHANCED BIRD MOMENTUM & MOVEMENT ==========
+        // -------------------- BIRD MOVEMENT (ENHANCED MOMENTUM) --------------------
         function updatePlayerMomentum() {
             if(!gameRunning) return;
-            // faster & more responsive: bird follows finger with inertia but snappy
             let diff = targetY - playerY;
-            momentum = momentum * 0.82 + diff * MOMENTUM_FACTOR;
+            momentum = momentum * 0.8 + diff * MOMENTUM_FACTOR;
             momentum = Math.min(MAX_SPEED_Y, Math.max(-MAX_SPEED_Y, momentum));
             playerY += momentum;
-            playerY = Math.min(Math.max(playerY, 8), WORLD_H - PLAYER_H - 8);
+            playerY = Math.min(Math.max(playerY, 15), WORLD_H - PLAYER_H - 15);
         }
         
-        // ========== PARTICLES (dynamic trail + effects) ==========
-        function updateParticles(){
+        // -------------------- PARTICLES UPDATE --------------------
+        function updateParticles() {
             for(let i=0; i<particles.length; i++){
                 const p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += 0.2;
                 p.life -= 0.022;
-                if(p.x > WORLD_W+70 || p.x < -70 || p.y > WORLD_H+100 || p.y < -100 || p.life <= 0){
+                if(p.x > WORLD_W+100 || p.x < -100 || p.y > WORLD_H+120 || p.y < -120 || p.life <= 0){
                     particles.splice(i,1);
                     i--;
                 }
             }
             
-            // Intense speed trail (bird afterburner effect)
-            if(gameRunning && Math.random() < 0.6){
+            // Trail effect while flying
+            if(gameRunning && Math.random() < 0.55){
                 trailParticles.push({
-                    x: playerX - 2,
-                    y: playerY + PLAYER_H/2 - 1 + (Math.random() - 0.5)*10,
-                    vx: -2.2 + (Math.random() - 0.5) * 1.2,
-                    vy: (Math.random() - 0.5) * 1.8,
-                    life: 0.7,
+                    x: playerX - 3,
+                    y: playerY + PLAYER_H/2 - 2 + (Math.random() - 0.5)*10,
+                    vx: -2.2 + (Math.random() - 0.5)*1.2,
+                    vy: (Math.random() - 0.5)*1.5,
+                    life: 0.68,
                     size: 2.5 + Math.random() * 5,
                     color: `rgba(255, 180, 70, ${0.6 + Math.random()*0.4})`
                 });
@@ -569,22 +486,23 @@
                 t.x += t.vx;
                 t.y += t.vy;
                 t.life -= 0.028;
-                if(t.x < -50 || t.life <= 0){
+                if(t.x < -60 || t.life <= 0){
                     trailParticles.splice(i,1);
                     i--;
                 }
             }
         }
         
-        // ========== EVENT HANDLERS (super smooth touch & mouse) ==========
+        // -------------------- TOUCH & MOUSE HANDLING (fullscreen) --------------------
         let activePointerId = null;
+        
         function handleMove(clientY) {
             if(!gameRunning) return;
-            const rect = canvas.getBoundingClientRect();
-            const scaleY = canvas.height / rect.height;
+            let rect = canvas.getBoundingClientRect();
+            let scaleY = canvas.height / rect.height;
             let canvasY = (clientY - rect.top) * scaleY;
             let newY = canvasY - PLAYER_H/2;
-            newY = Math.min(Math.max(newY, 8), WORLD_H - PLAYER_H - 8);
+            newY = Math.min(Math.max(newY, 15), WORLD_H - PLAYER_H - 15);
             targetY = newY;
         }
         
@@ -592,14 +510,15 @@
             e.preventDefault();
             const point = e.touches ? e.touches[0] : e;
             if(!point) return;
-            const rect = canvas.getBoundingClientRect();
-            const scaleY = canvas.height / rect.height;
+            let rect = canvas.getBoundingClientRect();
+            let scaleY = canvas.height / rect.height;
             let canvasY = (point.clientY - rect.top) * scaleY;
             let newY = canvasY - PLAYER_H/2;
-            newY = Math.min(Math.max(newY, 8), WORLD_H - PLAYER_H - 8);
+            newY = Math.min(Math.max(newY, 15), WORLD_H - PLAYER_H - 15);
             if(gameRunning) targetY = newY;
             if(e.touches) activePointerId = e.touches[0].identifier;
         }
+        
         function onPointerMove(e) {
             e.preventDefault();
             let clientY = null;
@@ -617,6 +536,7 @@
             }
             if(clientY !== null && gameRunning) handleMove(clientY);
         }
+        
         function onPointerEnd(e) { e.preventDefault(); activePointerId = null; }
         
         canvas.addEventListener('touchstart', onPointerStart, { passive: false });
@@ -629,68 +549,69 @@
         });
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
         
-        // ========== DRAW EVERYTHING (VIBRANT STYLE) ==========
+        // -------------------- DRAWING (fullscreen immersive) --------------------
         function drawBackground() {
-            const grad = ctx.createLinearGradient(0,0,0,WORLD_H);
-            grad.addColorStop(0,"#1f8b9e");
-            grad.addColorStop(1,"#0c4e5c");
+            const grad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+            grad.addColorStop(0, "#1f8b9e");
+            grad.addColorStop(1, "#0c4e5c");
             ctx.fillStyle = grad;
-            ctx.fillRect(0,0,WORLD_W,WORLD_H);
-            // clouds
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+            
+            // dynamic clouds
             ctx.fillStyle = "#fdf8e7cc";
             ctx.beginPath();
-            ctx.ellipse(180, 70, 75, 45, 0, 0, Math.PI*2);
-            ctx.ellipse(270, 58, 52, 38, 0, 0, Math.PI*2);
+            ctx.ellipse(180, 80, 85, 50, 0, 0, Math.PI*2);
+            ctx.ellipse(290, 65, 60, 42, 0, 0, Math.PI*2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(800, 115, 80, 48, 0, 0, Math.PI*2);
-            ctx.ellipse(890, 95, 55, 40, 0, 0, Math.PI*2);
+            ctx.ellipse(WORLD_W-200, 110, 90, 55, 0, 0, Math.PI*2);
+            ctx.ellipse(WORLD_W-100, 85, 65, 45, 0, 0, Math.PI*2);
             ctx.fill();
+            
             // sun glow
             ctx.fillStyle = "#ffdf88";
-            ctx.shadowBlur = 22;
+            ctx.shadowBlur = 25;
             ctx.beginPath();
-            ctx.arc(60, 60, 45, 0, Math.PI*2);
+            ctx.arc(70, 70, 48, 0, Math.PI*2);
             ctx.fill();
             ctx.shadowBlur = 0;
         }
         
         function drawBird() {
             ctx.save();
-            ctx.shadowBlur = 5;
-            // Fast bird body
+            ctx.shadowBlur = 4;
             ctx.fillStyle = "#f5b042";
             ctx.beginPath();
             ctx.roundRect(playerX, playerY, PLAYER_W-4, PLAYER_H, 12);
             ctx.fill();
             ctx.fillStyle = "#e06e2e";
             ctx.fillRect(playerX+PLAYER_W-18, playerY+6, 15, PLAYER_H-12);
-            // Wing effect
+            // wing
             ctx.fillStyle = "#ffcc66";
             ctx.beginPath();
             ctx.moveTo(playerX+12, playerY+PLAYER_H/2);
-            ctx.lineTo(playerX+32, playerY+PLAYER_H/2-9);
-            ctx.lineTo(playerX+32, playerY+PLAYER_H/2+9);
+            ctx.lineTo(playerX+32, playerY+PLAYER_H/2-11);
+            ctx.lineTo(playerX+32, playerY+PLAYER_H/2+11);
             ctx.fill();
-            // Eye
+            // eye
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(playerX+22, playerY+PLAYER_H/2-4, 6, 0, Math.PI*2);
+            ctx.arc(playerX+22, playerY+PLAYER_H/2-5, 7, 0, Math.PI*2);
             ctx.fill();
             ctx.fillStyle = "#010101";
             ctx.beginPath();
-            ctx.arc(playerX+20, playerY+PLAYER_H/2-5, 3, 0, Math.PI*2);
+            ctx.arc(playerX+20, playerY+PLAYER_H/2-6, 3.2, 0, Math.PI*2);
             ctx.fill();
             ctx.fillStyle = "white";
             ctx.beginPath();
-            ctx.arc(playerX+18, playerY+PLAYER_H/2-7, 1.5, 0, Math.PI*2);
+            ctx.arc(playerX+18, playerY+PLAYER_H/2-8, 1.5, 0, Math.PI*2);
             ctx.fill();
-            // Beak
+            // beak
             ctx.fillStyle = "#ff8c42";
             ctx.beginPath();
-            ctx.moveTo(playerX+38, playerY+PLAYER_H/2-3);
-            ctx.lineTo(playerX+48, playerY+PLAYER_H/2);
-            ctx.lineTo(playerX+38, playerY+PLAYER_H/2+3);
+            ctx.moveTo(playerX+38, playerY+PLAYER_H/2-4);
+            ctx.lineTo(playerX+50, playerY+PLAYER_H/2);
+            ctx.lineTo(playerX+38, playerY+PLAYER_H/2+4);
             ctx.fill();
             ctx.restore();
         }
@@ -712,8 +633,8 @@
                 ctx.arc(0, 0, COIN_SIZE/2 - 6, 0, Math.PI*2);
                 ctx.fill();
                 ctx.fillStyle = "#D4AF37";
-                ctx.font = `bold ${Math.floor(COIN_SIZE-6)}px monospace`;
-                ctx.fillText("💰", -7, 6);
+                ctx.font = `bold ${Math.floor(COIN_SIZE-7)}px monospace`;
+                ctx.fillText("💰", -8, 6);
                 ctx.setTransform(1,0,0,1,0,0);
                 ctx.restore();
             }
@@ -725,20 +646,20 @@
                 if(obs.type === "missile") {
                     ctx.fillStyle = "#e03a4e";
                     ctx.beginPath();
-                    ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 7);
+                    ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 8);
                     ctx.fill();
                     ctx.fillStyle = "#f5a442";
-                    for(let i=0;i<3;i++) ctx.fillRect(obs.x+5, obs.y+9+i*10, obs.width-12, 2);
+                    for(let i=0;i<3;i++) ctx.fillRect(obs.x+6, obs.y+10+i*10, obs.width-14, 2);
                 } else if(obs.type === "barrier") {
                     ctx.fillStyle = "#7a5d46";
                     ctx.beginPath();
                     ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 10);
                     ctx.fill();
                     ctx.fillStyle = "#bc8f6a";
-                    ctx.fillRect(obs.x+5, obs.y+5, obs.width-10, obs.height-10);
+                    ctx.fillRect(obs.x+6, obs.y+6, obs.width-12, obs.height-12);
                     ctx.fillStyle = "#ff9933";
-                    ctx.font = "bold 17px monospace";
-                    ctx.fillText("⛔", obs.x+obs.width/2-10, obs.y+obs.height/2+6);
+                    ctx.font = "bold 18px monospace";
+                    ctx.fillText("⛔", obs.x+obs.width/2-12, obs.y+obs.height/2+7);
                 } else {
                     ctx.translate(obs.x + obs.width/2, obs.y + obs.height/2);
                     ctx.rotate(obs.rotation);
@@ -747,7 +668,8 @@
                     ctx.arc(0, 0, obs.width/2, 0, Math.PI*2);
                     ctx.fill();
                     ctx.fillStyle = "#f2542d";
-                    ctx.fillText("💣", -9, -8);
+                    ctx.font = "bold 20px monospace";
+                    ctx.fillText("💣", -10, -9);
                     ctx.setTransform(1,0,0,1,0,0);
                 }
                 ctx.restore();
@@ -772,56 +694,16 @@
             ctx.globalAlpha = 1;
         }
         
-        function drawUI() {
-            ctx.font = "bold 17px monospace";
-            ctx.fillStyle = "#FFF7E8";
-            ctx.fillText("⚡ SPEED", WORLD_W-95, 35);
-            ctx.font = "bold 15px monospace";
-            ctx.fillStyle = "#FFD966";
-            ctx.fillText(`${speedMultiplier.toFixed(1)}x`, WORLD_W-48, 50);
-            if(!gameRunning){
-                ctx.font = "900 44px monospace";
-                ctx.fillStyle = "#ff8866";
-                ctx.shadowBlur = 0;
-                ctx.fillText("GAME OVER", WORLD_W/2-135, WORLD_H/2-45);
-                ctx.font = "18px monospace";
-                ctx.fillStyle = "#ffeeaa";
-                ctx.fillText("press RESTART", WORLD_W/2-70, WORLD_H/2+35);
-            }
+        function drawSpeedHint() {
+            // subtle speed indicator (minimal)
+            ctx.font = "bold 14px monospace";
+            ctx.fillStyle = "#ffecb3";
+            ctx.shadowBlur = 2;
+            ctx.fillText(`⚡ ${speedMultiplier.toFixed(1)}x`, WORLD_W - 55, 35);
+            ctx.shadowBlur = 0;
         }
         
-        // ========== MAIN LOOP ==========
-        function updateGame() {
-            if(gameRunning){
-                updatePlayerMomentum();    // enhanced momentum
-                updateObstaclesAndCoins();
-                updateScore();
-                handleSpawning();
-                updateGradualSpeed();      // slowly speed up
-            }
-            updateParticles();
-        }
-        
-        function draw() {
-            drawBackground();
-            drawCoins();
-            drawObstacles();
-            drawParticlesAndTrail();
-            drawBird();
-            drawUI();
-        }
-        
-        function animate() {
-            updateGame();
-            draw();
-            requestAnimationFrame(animate);
-        }
-        
-        // Reset button
-        const resetBtn = document.getElementById('resetGameBtn');
-        resetBtn.addEventListener('click', () => resetGame());
-        resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); resetGame(); });
-        
+        // Helper: roundRect
         if(!CanvasRenderingContext2D.prototype.roundRect){
             CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
                 if (w < 2*r) r = w/2;
@@ -839,11 +721,50 @@
             };
         }
         
+        // -------------------- MAIN GAME LOOP --------------------
+        function updateGame() {
+            if(gameRunning){
+                updatePlayerMomentum();
+                updateObstaclesAndCoins();
+                updateScore();
+                handleSpawning();
+                updateGradualSpeed();
+            }
+            updateParticles();
+        }
+        
+        function draw() {
+            drawBackground();
+            drawCoins();
+            drawObstacles();
+            drawParticlesAndTrail();
+            drawBird();
+            drawSpeedHint();
+        }
+        
+        function animate() {
+            updateGame();
+            draw();
+            requestAnimationFrame(animate);
+        }
+        
+        // Reset button event
+        const resetBtn = document.getElementById('resetGameBtn');
+        resetBtn.addEventListener('click', () => resetGame());
+        resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); resetGame(); });
+        
+        // initial reset & start
         resetGame();
-        updateBestUI();
+        updateScoreUI();
         updateCoinUI();
         animate();
-        window.dispatchEvent(new Event('resize'));
+        
+        // handle orientation change + canvas resize
+        window.addEventListener('resize', () => {
+            updateCanvasSize();
+            playerY = Math.min(Math.max(playerY, 15), WORLD_H - PLAYER_H - 15);
+            targetY = playerY;
+        });
     })();
 </script>
 </body>
